@@ -1,0 +1,41 @@
+[
+  {
+    "resource": "com::test::TestResource",
+    "action": ["read", "update"],
+    "description": "Read/update access for TestResource.",
+    "effect": "allow",
+    "conditions": [
+      {
+        "equal": {
+          "user::user_role_ids": ["1", "2"]
+        }
+      }
+    ]
+  },
+  {
+    "resource": "com::test::TestResource",
+    "action": ["delete"],
+    "description": "Delete access for TestResource",
+    "effect": "allow",
+    "conditions": [
+      {
+        "equal": {
+          "user::user_role_ids": ["1"]
+        }
+      }
+    ]
+  },
+  {
+    "resource": "com::test::TestResource",
+    "action": ["read"],
+    "description": "Read access for TestResource.",
+    "effect": "deny",
+    "conditions": [
+      {
+        "equal": {
+          "user::user_role_ids": ["5"]
+        }
+      }
+    ]
+  }
+]
