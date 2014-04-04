@@ -11,15 +11,16 @@ For more details around the motivation for this project, see: http://eng.climate
 
 Add this line to your application's Gemfile:
 
-    gem 'iron_hide'
+    gem 'iron_hide', path: '/path/to/source'
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
-Or install it yourself as:
-
-    $ gem install iron_hide
+Or build and install it yourself as:
+    
+    $ gem build '/path/to/iron_hide.gemspec'
+    $ gem install iron_hide.gem
 
 ## Usage
 
