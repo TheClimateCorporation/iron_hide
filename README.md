@@ -1,5 +1,7 @@
 # IronHide
 
+[![Gem Version](https://badge.fury.io/rb/iron_hide.svg)](http://badge.fury.io/rb/iron_hide)
+
 _Experimenting with a new way to implement authorization._
 
 IronHide is an authorization library. It uses a simple, declarative language implemented in JSON.
