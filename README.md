@@ -232,9 +232,10 @@ The File adapter allows rules to be written into a flat file. See `spec/rules.js
 
 ## Contributing
 
-`bundle install` to install dependencies
-`rake` to run tests
-`yard` to generation documentation
+- `bundle install` to install dependencies
+- `rake` to run tests
+- `yard` to generate documentation
+- Pull requests, issues, comments are welcome
 
 ## Further Reading
 - Service-Oriented Authorization blog posts: 
