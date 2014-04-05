@@ -9,6 +9,8 @@ IronHide is an authorization library. It uses a simple, declarative language imp
 
 For more details around the motivation for this project, see: http://eng.climate.com/2014/02/12/service-oriented-authorization-part-1/
 
+For a _tiny_ example, look here https://github.com/TheClimateCorporation/iron_hide_sample_app
+
 
 ## Installation
 
