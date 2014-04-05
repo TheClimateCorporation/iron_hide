@@ -2,7 +2,7 @@
 
 _Experimenting with a new way to implement authorization._
 
-Ironhide is an authorization library. It uses a simple, declarative language implemented in JSON.
+IronHide is an authorization library. It uses a simple, declarative language implemented in JSON.
 
 For more details around the motivation for this project, see: http://eng.climate.com/2014/02/12/service-oriented-authorization-part-1/
 
@@ -62,14 +62,90 @@ Authorization rules are JSON documents. Here is an example of a document:
   ]
 ```
 
-The language enables an Attribute Based Access Control (ABAC) authorization model.
+The language enables a context-aware attribute-based access control (ABAC) authorization model. The language allows references to the `user` and `resource` objects. The library (i.e., `IronHide`) should guarantee that it is able to parse the attributes of these objects (e.g., `user::attribute::nested_attribute`), while maintaining immutability of the object itself.
 
-This means that the authorization language is aware of the context of the authorization request and the authorization decision is based upon evaluating that context.
+#### Resource
 
-#### Attribute Based Access Control
+The resource to which the rule applies. These should be namespaced properly, since multiple applications may share resources.
 
-The language allows references to a `user` and a `resource`.
+#### Action
 
+An array of Strings that specifies the set of actions to which the current rule applies.
+
+Actions can be named anything you want and in Ruby/Rails these would typically be aligned with the instance methods for a class:
+
+```ruby
+class User
+  # The 'delete' action
+  def delete
+    ...
+  end
+
+  # The 'charge' action
+  def charge
+    ...
+  end
+end
+```
+
+#### Description
+
+A string that helps humans reading the rule JSON understand it more easily. It’s optional.
+
+#### Effect
+
+This is required. It is the effect a rule has when a user requests access to conduct an action to which the rule applies. It is either ‘allow’ or ‘deny’.
+
+#### Evaluation of Rules
+
+1. Default: Deny
+2. Evaluate applicable policies
+    - Match on: resource and action
+3. Does policy exist for resource and action?
+    - If no: Deny
+    - Do any rules resolve to Deny?
+        - If yes, Deny
+        - If no, Do any rules resolve to Allow?
+        - If yes, Allow
+    - Else: Deny
+
+**If access to a resource is not specifically allowed, authorization will default to DENY. This should make it easy to reason about: “A user was denied this request. I should create a rule that specifically allows access.”**
+
+#### Conditions
+
+Conditions are expressions that are evaluated to decide whether the effect of a particular rule should or should not apply. The expression semantics are dictated by the consuming application and the implementation of the library code that is used to communicate with and parse our rules.
+
+This object is optional (i.e., the rule is always in effect). It is an array of objects to allow multiple of the same type of condition to be evaluated (e.g., `equal`, `not_equal`).
+
+When creating a condition block, the name of each condition is specified, and there is at least one key-value pair for each condition.
+
+**How conditions are evaluated:**
+
+* A logical AND is applied to conditions within a condition block and to the keys with that condition.
+* A logical OR is applied to the values of a single key.
+* All conditions must be met (logical AND across all conditions) to return an allow or deny decision.
+
+For example, here the agency_id of a resource must equal the agency_id of a user.
+
+```javascript
+// Condition
+{
+  "equal": {
+    "resource::agency_id": ["user::agency_id"]
+  }
+}
+```
+
+The value of a key in a condition may be checked against multiple values. It must match at least one for the condition to hold.
+
+```javascript
+// Condition
+{
+  "equal": {
+    "user::role_id": [1,2,3,4]
+  }
+}
+```
 
 ### Configuration
 
@@ -155,11 +231,20 @@ The File adapter allows rules to be written into a flat file. See `spec/rules.js
 `rake` to run tests
 `yard` to generation documentation
 
+## Further Reading
+- Service-Oriented Authorization blog posts: 
+    - [Part 1](http://eng.climate.com/2014/02/12/service-oriented-authorization-part-1/)
+    - [Part 2](http://eng.climate.com/2014/02/12/service-oriented-authorization-part-2/)
+- [XACML(eXtensible Access Control Markup Language)](http://en.wikipedia.org/wiki/XACML)
+- Amazon: [Access Policy Language](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/AccessPolicyLanguage.html)
+
 ## TODO
 
 - Write a more detailed language specification
 - Better README
 - Move configuration to a module outside the top-level namespace
 - Support for additional back-ends
+- Admin interface for modifying policies
 
-See README in `applications/gems`
+
+
