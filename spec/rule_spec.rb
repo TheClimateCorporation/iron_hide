@@ -15,8 +15,10 @@ describe IronHide::Rule do
 
   describe "::find" do
     before do
-      IronHide.adapter = :file
-      IronHide.json = 'spec/rules.json'
+      IronHide.configure do |config|
+        config.adapter = :file
+        config.json    = 'spec/rules.json'
+      end
     end
 
     let(:action)   { 'read' }
@@ -24,7 +26,7 @@ describe IronHide::Rule do
     let(:user)     { double('user') }
 
     before do
-      IronHide.namespace = "com::test"
+      IronHide.configure { |c| c.namespace = "com::test" }
       resource.stub_chain(:class, :name) { 'TestResource' }
     end
 

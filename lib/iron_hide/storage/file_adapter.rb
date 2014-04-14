@@ -1,14 +1,12 @@
 module IronHide
   class Storage
     # @api private
-    class FileAdapter < AbstractAdapter
+    class FileAdapter
       attr_reader :rules
 
       def initialize
-        json = IronHide.json.each_with_object([]) do |files, ary|
-          Array(files).map do |file|
-            ary.concat(MultiJson.load(File.open(file).read, minify: true))
-          end
+        json = Array(IronHide.configuration.json).each_with_object([]) do |file, ary|
+          ary.concat(MultiJson.load(File.open(file).read, minify: true))
         end
         @rules = unfold(json)
       rescue MultiJson::ParseError => e

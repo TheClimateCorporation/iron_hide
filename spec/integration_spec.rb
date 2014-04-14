@@ -92,9 +92,11 @@ describe "Integration Testing" do
       ]
     RULES
     @file.rewind
-    IronHide.adapter   = :file
-    IronHide.json      = @file.path
-    IronHide.namespace = "com::test"
+    IronHide.configure do |config|
+      config.adapter   = :file
+      config.json      = @file.path
+      config.namespace = "com::test"
+    end
   end
 
   after(:all) { @file.close }

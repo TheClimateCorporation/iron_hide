@@ -20,7 +20,7 @@ module IronHide
     # @param resource [Object]
     # @return [Array<IronHide::Rule>]
     def self.find(user, action, resource)
-      ns_resource = "#{IronHide.namespace}::#{resource.class.name}"
+      ns_resource = "#{IronHide.configuration.namespace}::#{resource.class.name}"
       storage.where(resource: ns_resource, action: action).map do |json|
         new(user, resource, json)
       end

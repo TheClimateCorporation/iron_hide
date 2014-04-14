@@ -170,7 +170,7 @@ IronHide.config do |c|
 
   # This is helpful if you have multiple projects with similarly named
   # resources
-  c.namespace = 'com::myproject'
+  c.namespace = 'com::myproject' # Default 'com::IronHide'
 end
 ```
 

@@ -4,8 +4,10 @@ describe IronHide::Storage::FileAdapter do
   context "when using FileAdapter" do
     before(:all) do
       IronHide.reset
-      IronHide.adapter = :file
-      IronHide.json    = File.join('spec','rules.json')
+      IronHide.config do |config|
+        config.adapter = :file
+        config.json    = File.join('spec','rules.json')
+      end
     end
 
     let(:storage) { IronHide.storage }
