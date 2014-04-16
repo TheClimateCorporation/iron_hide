@@ -225,11 +225,15 @@ IronHide works with rules defined in the canonical JSON language. The storage ba
 
 An available adapter type must be specified in a configuration file, which gets loaded with the application at start time.
 
-At the moment, only the File(JSON) adapter is supported.
+The default adapter is the `File Adapter`.
 
 #### File Adapter
 
 The File adapter allows rules to be written into a flat file. See `spec/rules.json` for an example.
+
+#### CouchDB Adapter
+
+See: https://github.com/TheClimateCorporation/iron_hide-storage-couchdb_adapter
 
 ## Contributing
 
