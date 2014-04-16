@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/iron_hide.svg)](http://badge.fury.io/rb/iron_hide)
 [![Build Status](https://travis-ci.org/TheClimateCorporation/iron_hide.svg?branch=master)](https://travis-ci.org/TheClimateCorporation/iron_hide)
+[![Code Climate](https://codeclimate.com/github/TheClimateCorporation/iron_hide.png)](https://codeclimate.com/github/TheClimateCorporation/iron_hide)
 
 _Experimenting with a new way to implement authorization._
 
