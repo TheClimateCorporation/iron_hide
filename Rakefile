@@ -1,6 +1,6 @@
 require 'bundler/gem_tasks'
 require 'rake/testtask'
-require 'pp'
+require 'date'
 
 Rake::TestTask.new do |t|
     t.libs << 'spec'
