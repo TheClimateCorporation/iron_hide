@@ -172,6 +172,9 @@ IronHide.config do |c|
   # This is helpful if you have multiple projects with similarly named
   # resources
   c.namespace = 'com::myproject' # Default 'com::IronHide'
+
+  # See Memoizing below
+  c.memoize = true # Default
 end
 ```
 
@@ -219,6 +222,55 @@ IronHide.can? current_user, :read, User.find(1)
 #=> true
 ```
 
+### Attribute Memoization
+
+Each time `::can?` or `::authorize!` is called, 0 or more rules are evaluated.
+Each of these rules could depend on the evaluation of an unbounded number of
+expressions.
+
+In the last example of the previous section, the `:id` attribute of a user must
+match the  `:manager_id` attribute of a resource. We can imagine the case where
+the method call, `resource.manager_id` could potentially be expensive (e.g.,
+it's not a simple DB attribute and requires a complex SQL query).
+
+Memoization caches the method call, `resource.manager_id`, so that subsquent
+rules that attribute do not repeat the call. Here is a simple example where two
+rules need to be evaluated for a single action, `read` and memoization can
+improve performance.
+
+```javascript
+[
+  {
+    "resource": "namespace::User",
+    "action": ["read"],
+    "description": "Allow users read users",
+    "effect": "allow",
+    "conditions": [
+      {
+        "equal": {
+          "user::id": ["resource::id", "resource::manager_id"]
+        }
+      }
+    ]
+  },
+  {
+    "resource": "namespace::User",
+    "action": ["read", "manage"],
+    "description": "Allow users to read and manage users",
+    "effect": "allow",
+    "conditions": [
+      {
+        "equal": {
+          "user::id": ["resource::manager_id"]
+        }
+      }
+    ]
+  }
+]
+```
+
+
+
 ### Adapters
 
 IronHide works with rules defined in the canonical JSON language. The storage back-end is abstracted through the use of adapters.
@@ -253,8 +305,6 @@ See: https://github.com/TheClimateCorporation/iron_hide-storage-couchdb_adapter
 
 - Write a more detailed language specification
 - Better README
-- Move configuration to a module outside the top-level namespace
-- Support for additional back-ends
 - Admin interface for modifying policies
 
 

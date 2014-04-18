@@ -20,7 +20,7 @@ module IronHide
     # @return [EqualCondition, NotEqualCondition]
     # @raise [IronHide::InvalidConditional] for too many keys
     #
-    def self.new(params)
+    def self.new(params, cache = NullCache.new)
       if params.length > 1
         raise InvalidConditional, "Expected #{params} to have one key"
       end
@@ -30,7 +30,7 @@ module IronHide
       # See: http://ruby-doc.org/core-1.9.3/Class.html#method-i-allocate
       klass = VALID_TYPES.fetch(type){ raise InvalidConditional, "#{type} is not valid"}
       cond  = IronHide.const_get(klass).allocate
-      cond.send(:initialize, (conditionals))
+      cond.send(:initialize, conditionals, cache)
       cond
     end
 
@@ -41,11 +41,14 @@ module IronHide
     #    'user::user_role_ids' => ['8']
     #  }
     #
-    def initialize(conditionals)
+    # @param [IronHide::SimpleCache, IronHide::NullCache] cache
+    #
+    def initialize(conditionals, cache)
       @conditionals = conditionals
+      @cache        = cache
     end
 
-    attr_reader :conditionals
+    attr_reader :conditionals, :cache
 
     # @param user [Object]
     # @param resource [Object]
@@ -93,18 +96,20 @@ module IronHide
     def evaluate(expression, user, resource)
       Array(expression).flat_map do |el|
         if expression?(el)
-          type, *ary  = el.split('::')
-          if type == 'user'
-            Array(ary.inject(user) do |rval, attr|
-              rval.freeze.public_send(attr)
-            end)
-          elsif type == 'resource'
-            Array(ary.inject(resource) do |rval, attr|
-              rval.freeze.public_send(attr)
-            end)
-          else
-            raise "Expected #{type} to be 'resource' or 'user'"
-          end
+          cache.fetch(el) {
+            type, *ary  = el.split('::')
+            if type == 'user'
+              Array(ary.inject(user) do |rval, attr|
+                rval.freeze.public_send(attr)
+              end)
+            elsif type == 'resource'
+              Array(ary.inject(resource) do |rval, attr|
+                rval.freeze.public_send(attr)
+              end)
+            else
+              raise "Expected #{type} to be 'resource' or 'user'"
+            end
+          }
         else
           el
         end
