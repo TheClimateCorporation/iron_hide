@@ -1,16 +1,18 @@
+require 'iron_hide/memoize'
+
 module IronHide
   class Rule
     ALLOW     = 'allow'.freeze
     DENY      = 'deny'.freeze
 
-    attr_reader :description, :effect, :conditions, :user, :resource
+    attr_reader :description, :effect, :conditions, :user, :resource, :cache
 
-    def initialize(user, resource, params = {})
+    def initialize(user, resource, params = {}, cache = NullCache.new)
       @user        = user
       @resource    = resource
       @description = params['description']
       @effect      = params.fetch('effect', DENY) # Default DENY
-      @conditions  = Array(params['conditions']).map { |c| Condition.new(c) }
+      @conditions  = Array(params['conditions']).map { |c| Condition.new(c, cache) }
     end
 
     # Returns all applicable rules matching on resource and action
@@ -20,9 +22,10 @@ module IronHide
     # @param resource [Object]
     # @return [Array<IronHide::Rule>]
     def self.find(user, action, resource)
+      cache       = IronHide.configuration.memoizer.new
       ns_resource = "#{IronHide.configuration.namespace}::#{resource.class.name}"
       storage.where(resource: ns_resource, action: action).map do |json|
-        new(user, resource, json)
+        new(user, resource, json, cache)
       end
     end
 

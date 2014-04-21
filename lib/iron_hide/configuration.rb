@@ -1,11 +1,16 @@
 module IronHide
   class Configuration
 
-    attr_accessor :adapter, :namespace, :json
+    attr_accessor :adapter, :namespace, :json, :memoize
 
     def initialize
       @adapter   = :file
       @namespace = 'com::IronHide'
+      @memoize   = true
+    end
+
+    def memoizer
+      memoize ? SimpleCache : NullCache
     end
 
     # Extend configuration variables
