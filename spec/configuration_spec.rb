@@ -8,6 +8,7 @@ describe IronHide::Configuration do
       expect(configuration.adapter).to eq :file
       expect(configuration.namespace).to eq 'com::IronHide'
       expect(configuration.json).to eq nil
+      expect(configuration.logger.class).to eq Logger
     end
   end
 

@@ -1,5 +1,6 @@
 [
   {
+    "uuid" : "So glad we added uuids to start with",
     "resource": "com::test::TestResource",
     "action": ["read", "update"],
     "description": "Read/update access for TestResource.",
@@ -13,6 +14,7 @@
     ]
   },
   {
+    "uuid" : "Look, another snowflake!",
     "resource": "com::test::TestResource",
     "action": ["delete"],
     "description": "Delete access for TestResource",
@@ -26,6 +28,7 @@
     ]
   },
   {
+    "uuid" : "These would have been such a pain to add",
     "resource": "com::test::TestResource",
     "action": ["read"],
     "description": "Read access for TestResource.",

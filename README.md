@@ -63,16 +63,26 @@ Authorization rules are JSON documents. Here is an example of a document:
             "user::disabled": [true]
           }
         }
-      ]
+      ],
+
+      "uuid" : "some-uniq-vals-here"
     }
   ]
 ```
 
 The language enables a context-aware attribute-based access control (ABAC) authorization model. The language allows references to the `user` and `resource` objects. The library (i.e., `IronHide`) should guarantee that it is able to parse the attributes of these objects (e.g., `user::attribute::nested_attribute`), while maintaining immutability of the object itself.
 
+The policy language was heavily inspired by the AWS IAM policies. For an
+overview of this way of specifying authorization, see
+(the Amazon docs located
+here)[http://docs.aws.amazon.com/IAM/latest/UserGuide/PoliciesOverview.html].
+
 #### Resource
 
-The resource to which the rule applies. These should be namespaced properly, since multiple applications may share resources.
+The resource to which the rule applies. These should be namespaced properly,
+since multiple applications may share resources. This resource should represent a generic name that any authorizing service can understand.
+Please note that currently the resource specification must be either a "user" or
+the key "resource", "user", or a string in the form of "word::word(::word)+"
 
 #### Action
 
@@ -153,6 +163,16 @@ The value of a key in a condition may be checked against multiple values. It mus
 }
 ```
 
+#### UUIDs
+
+IronHide takes an incredibly non opinionated approach as to how you store your
+documents. We don't depend on resources having any ID, but having a primary key
+for each resource does make debugging the resources responsible for allowing or
+denying an action much easier. We just ask that you supply a string "uuid"
+parameter for a rule if you would like meaningful logging during development.
+This can be a randomly generated uuid, or if you're just storing your rules in a
+flat file, incrementing an integer string is just fine too.
+
 ### Configuration
 
 IronHide must be configured during application load time.
@@ -204,7 +224,8 @@ Given a rule like this:
             "user::id": ["resource::id", "resource::manager_id"]
           }
         }
-      ]
+      ],
+      "uuid" : "aaaa-bbbb-cccc-dddd"
     }
 ```
 
@@ -251,7 +272,8 @@ improve performance.
           "user::id": ["resource::id", "resource::manager_id"]
         }
       }
-    ]
+    ],
+    "uuid" : "aaaa-bbbb-cccc-dddd"
   },
   {
     "resource": "namespace::User",
@@ -264,7 +286,8 @@ improve performance.
           "user::id": ["resource::manager_id"]
         }
       }
-    ]
+    ],
+    "uuid" : "eeee-ffff-gggg-hhhh"
   }
 ]
 ```
@@ -283,6 +306,22 @@ The default adapter is the `File Adapter`.
 
 The File adapter allows rules to be written into a flat file. See `spec/rules.json` for an example.
 
+
+#### Logging
+
+One of the most difficult pieces of debugging authorization logic is determining
+which rule is responsible for the authorization decision. To enable easy
+debugging, set the level in the configuration.
+````
+IronHide.config do |c|
+  c.logger.level = Logger::DEBUG
+end
+````
+
+The application will now output two pieces of information: The uuids for all
+matching rules, and the specific rule that resulted in the authorization
+decision or a "No rule matched" statement.
+
 #### CouchDB Adapter
 
 See: https://github.com/TheClimateCorporation/iron_hide-storage-couchdb_adapter
@@ -295,7 +334,7 @@ See: https://github.com/TheClimateCorporation/iron_hide-storage-couchdb_adapter
 - Pull requests, issues, comments are welcome
 
 ## Further Reading
-- Service-Oriented Authorization blog posts: 
+- Service-Oriented Authorization blog posts:
     - [Part 1](http://eng.climate.com/2014/02/12/service-oriented-authorization-part-1/)
     - [Part 2](http://eng.climate.com/2014/02/12/service-oriented-authorization-part-2/)
 - [XACML(eXtensible Access Control Markup Language)](http://en.wikipedia.org/wiki/XACML)

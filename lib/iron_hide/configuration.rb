@@ -1,12 +1,18 @@
+require 'logger'
+
 module IronHide
   class Configuration
 
-    attr_accessor :adapter, :namespace, :json, :memoize
+    attr_accessor :adapter, :namespace, :json, :memoize, :logger
 
     def initialize
       @adapter   = :file
       @namespace = 'com::IronHide'
       @memoize   = true
+      @logger =  Logger.new($stdout).tap do |log|
+          log.progname = 'ironhide'
+          log.level = Logger::WARN
+      end
     end
 
     def memoizer

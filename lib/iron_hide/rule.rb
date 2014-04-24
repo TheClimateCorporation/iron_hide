@@ -1,11 +1,13 @@
 require 'iron_hide/memoize'
+require 'pry'
 
 module IronHide
   class Rule
     ALLOW     = 'allow'.freeze
     DENY      = 'deny'.freeze
 
-    attr_reader :description, :effect, :conditions, :user, :resource, :cache
+    attr_reader :description, :effect, :conditions, :user, :resource, :cache,
+      :uuid
 
     def initialize(user, resource, params = {}, cache = NullCache.new)
       @user        = user
@@ -13,6 +15,7 @@ module IronHide
       @description = params['description']
       @effect      = params.fetch('effect', DENY) # Default DENY
       @conditions  = Array(params['conditions']).map { |c| Condition.new(c, cache) }
+      @uuid = params['uuid']
     end
 
     # Returns all applicable rules matching on resource and action
@@ -24,10 +27,12 @@ module IronHide
     def self.find(user, action, resource)
       cache       = IronHide.configuration.memoizer.new
       ns_resource = "#{IronHide.configuration.namespace}::#{resource.class.name}"
-      storage.where(resource: ns_resource, action: action).map do |json|
+
+      matching_rules(ns_resource, action).map do  |json|
         new(user, resource, json, cache)
       end
     end
+
 
     # NOTE: If any Rule is an explicit DENY, then an allow cannot override the Rule
     #       If any Rule is explicit ALLOW, and there is no explicit DENY, then ALLOW
@@ -39,15 +44,54 @@ module IronHide
     # @param resource [String]
     #
     def self.allow?(user, action, resource)
-      find(user, action, resource).inject(false) do |rval, rule|
+      any_authorized = false
+      find(user, action, resource).each do |rule|
         # For an explicit DENY, stop evaluating, and return false
-        rval = false and break if rule.explicit_deny?
+        if rule.explicit_deny?
+          return false
 
-        # For an explicit ALLOW, true
-        rval = true if rule.allow?
-
-        rval
+        elsif rule.allow?
+          any_authorized = true
+        end
       end
+
+      if any_authorized
+        return true
+      else
+        log_no_rules
+        return false
+      end
+    end
+
+
+
+    # @return [Boolean]
+    def allow?
+      result = (effect == ALLOW && conditions.all? { |c| c.met?(user,resource) } )
+      if result
+        log_rule_action(uuid, "allow")
+      end
+      return result
+    end
+
+    # @return [Boolean]
+    def explicit_deny?
+      result = (effect == DENY && conditions.all? { |c| c.met?(user,resource) } )
+      if result
+        log_rule_action(uuid, "explicitly deny")
+      end
+      return result
+    end
+
+    alias_method :deny?, :explicit_deny?
+    private
+
+    # The list of rules that are associated with a namespaced resource
+    # and an action.
+    def self.matching_rules(ns_resource, action)
+      matches = storage.where(resource: ns_resource, action: action)
+      log_rules(matches.map { |json| json["uuid"] } )
+      return matches
     end
 
     # An abstraction over the storage of the rules
@@ -57,16 +101,17 @@ module IronHide
       IronHide.storage
     end
 
-    # @return [Boolean]
-    def allow?
-      effect == ALLOW && conditions.all? { |c| c.met?(user,resource) }
+
+    def self.log_rules(uuids)
+      IronHide.logger.debug "Matching Rules=#{uuids.join("&")}}"
     end
 
-    # @return [Boolean]
-    def explicit_deny?
-      effect == DENY && conditions.all? { |c| c.met?(user,resource) }
+    def self.log_no_rules
+      IronHide.logger.debug "No matching rules"
     end
 
-    alias_method :deny?, :explicit_deny?
+    def log_rule_action(uuid, status)
+      IronHide.logger.debug "Rule matched #{uuid} with status: #{status}"
+    end
   end
 end

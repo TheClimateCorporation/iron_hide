@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'tempfile'
+require 'stringio'
 
 describe "Integration Testing" do
   before(:all) do
@@ -7,6 +8,7 @@ describe "Integration Testing" do
     @file.write <<-RULES
       [
         {
+          "uuid" : "1123-aabc-rand-ishard",
           "resource": "com::test::TestResource",
           "action": ["read", "write"],
           "description": "Read/write access for TestResource.",
@@ -21,6 +23,7 @@ describe "Integration Testing" do
           ]
         },
         {
+          "uuid" : "enjoyTheCamelCaseAlan",
           "resource": "com::test::TestResource",
           "action": ["disable"],
           "description": "Read/write access for TestResource.",
@@ -34,6 +37,7 @@ describe "Integration Testing" do
           ]
         },
         {
+          "uuid" : "It's an opaque string, you shouldn't care",
           "resource": "com::test::TestResource",
           "action": ["read"],
           "description": "Read access for TestResource.",
@@ -47,6 +51,7 @@ describe "Integration Testing" do
           ]
         },
         {
+          "uuid" : "butYouKnowItKillsYooooooouu",
           "resource": "com::test::TestResource",
           "action": ["read"],
           "effect": "deny",
@@ -59,6 +64,7 @@ describe "Integration Testing" do
           ]
         },
         {
+          "uuid" : "Less Fun now",
           "resource": "com::test::TestResource",
           "action": ["destroy"],
           "effect": "allow",
@@ -77,6 +83,7 @@ describe "Integration Testing" do
           ]
         },
         {
+          "uuid" : "So maaany tests?",
           "resource": "com::test::TestResource",
           "action": ["fire"],
           "effect": "allow",
@@ -236,6 +243,22 @@ describe "Integration Testing" do
       before  { user.manager.name = "Phil" }
       specify { expect(IronHide.can?(user,action,resource)).to be_false }
       specify { expect{IronHide.authorize!(user,action,resource)}.to raise_error }
+    end
+  end
+
+
+  describe "it should support logging" do
+    begin
+      initial_logger = IronHide.logger
+      dummy_file = StringIO.new
+      IronHide.config {|c| c.logger = Logger.new dummy_file }
+
+      IronHide.logger.error "Logging output"
+      dummy_file.rewind
+
+      specify { expect(dummy_file.read).to match(/Logging output/) }
+
+      IronHide.config {|c| c.logger = initial_logger }
     end
   end
 end
