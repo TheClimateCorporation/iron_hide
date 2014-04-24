@@ -23,6 +23,7 @@ describe IronHide::Storage::FileAdapter do
       let(:example1) do
         [
           {
+            "uuid" => "So glad we added uuids to start with",
             "resource" => "com::test::TestResource",
             "action" => [ "read", "update" ],
             "description" => "Read/update access for TestResource.",
@@ -32,6 +33,7 @@ describe IronHide::Storage::FileAdapter do
             ]
           },
           {
+            "uuid" => "These would have been such a pain to add",
             "resource" => "com::test::TestResource",
             "action" => [ "read" ],
             "description" => "Read access for TestResource.",
@@ -56,6 +58,7 @@ describe IronHide::Storage::FileAdapter do
       let(:example2) do
         [
           {
+            "uuid" => "So glad we added uuids to start with",
             "resource" => "com::test::TestResource",
             "action" => [ "read", "update" ],
             "description" => "Read/update access for TestResource.",
@@ -79,6 +82,7 @@ describe IronHide::Storage::FileAdapter do
       let(:example3) do
         [
           {
+            "uuid" => "Look, another snowflake!",
             "resource" => "com::test::TestResource",
             "action"=> [ "delete" ],
             "description"=> "Delete access for TestResource",

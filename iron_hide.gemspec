@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = IronHide::VERSION
   spec.authors       = ["Alan Cohen"]
   spec.email         = ["acohen@climate.com"]
-  spec.description   = %q{A Ruby authorization library}
+  spec.description   = %q{A reference ruby implementation for the JSON based authorizaiton language}
   spec.summary       = %q{Describe your authorization rules with JSON}
   spec.homepage      = "http://github.com/TheClimateCorporation/iron_hide"
   spec.license       = "MIT"

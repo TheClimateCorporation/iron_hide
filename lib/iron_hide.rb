@@ -1,4 +1,5 @@
 module IronHide
+  DEFAULT = false
   class << self
 
     # @raise [IronHide::AuthorizationError] if authorization fails
@@ -45,6 +46,12 @@ module IronHide
     # @return [void]
     def reset
       @storage = nil
+    end
+
+    # Delegates all logging to the logger configured in the configuration
+    # object.
+    def logger
+      configuration.logger
     end
   end
 end

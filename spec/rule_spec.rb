@@ -33,6 +33,7 @@ describe IronHide::Rule do
     it "returns a collection of Rule instances that match an action and resource" do
       expect(IronHide::Rule.find(user,action,resource).first).to be_instance_of(IronHide::Rule)
     end
+
   end
 
   describe "::allow?" do
